@@ -27,27 +27,73 @@ public_users.post("/register", (req, res) => {
 
 // Get the book list available in the shop
 public_users.get('/', function (req, res) {
-    //Write your code here
-    res.send(JSON.stringify(books,null,4));
+    let getBooks = new Promise((resolve, reject) => {
+        resolve(books);
+    });
+
+    getBooks.then(books => {
+        res.send(JSON.stringify(books, null, 4));
+    });
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', function (req, res) {
     const isbn = req.params.isbn;
-    res.send(Object.values(books).filter(book => book.isbn === isbn)[0]);
+    let getBookByISBN = new Promise((resolve, reject) => {
+        let book = Object.values(books).filter(book => book.isbn === isbn)[0];
+        if (book) {
+            resolve(book);
+        } else {
+            reject("Book not found");
+        }
+    });
+
+    getBookByISBN.then(book => {
+        res.send(JSON.stringify(book, null, 4));
+    }).catch(error => {
+        res.status(404).json({ message: error });
+    });
+
 });
 
 // Get book details based o n author
 public_users.get('/author/:author', function (req, res) {
     const author = req.params.author;
-    res.send(Object.values(books).filter(book => book.author.toLowerCase().includes(author.toLowerCase())));
+
+    let getBooksByAuthor = new Promise((resolve, reject) => {
+        let booksFiltered = Object.values(books).filter(book => book.author.toLowerCase().includes(author.toLowerCase()));
+        if (booksFiltered.length > 0) {
+            resolve(booksFiltered);
+        } else {
+            reject("Books not found");
+        }
+    });
+
+    getBooksByAuthor.then(books => {
+        res.send(JSON.stringify(books, null, 4));
+    }).catch(error => {
+        res.status(404).json({ message: error });
+    });
 });
 
 // Get all books based on title
 public_users.get('/title/:title', function (req, res) {
     //Write your code here
     const title = req.params.title;
-    res.send(Object.values(books).filter(book => book.title.toLowerCase().includes(title.toLowerCase())));
+    let getBooksByTitle = new Promise((resolve, reject) => {
+        let booksFiltered = Object.values(books).filter(book => book.title.toLowerCase().includes(title.toLowerCase()));
+        if (booksFiltered.length > 0) {
+            resolve(booksFiltered);
+        } else {
+            reject("Books not found");
+        }
+    });
+
+    getBooksByTitle.then(books => {
+        res.send(JSON.stringify(books, null, 4));
+    }).catch(error => {
+        res.status(404).json({ message: error });
+    });
 });
 
 //  Get book review
