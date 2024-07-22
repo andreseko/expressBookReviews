@@ -27,6 +27,16 @@ const doesExist = (username) => {
     return isValid(username);
 }
 
+const getBookIdByISBN = (isbn) => {
+    for (let [id, book] of Object.entries(books)) {
+        if (isbn && book.isbn === isbn) {
+            return id;
+        }
+    }
+
+    return null;
+};
+
 //only registered users can login
 regd_users.post("/login", (req, res) => {
     //Write your code here
@@ -54,8 +64,47 @@ regd_users.post("/login", (req, res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-    //Write your code here
-    return res.status(300).json({message: "Yet to be implemented"});
+    let textReview = req.query.review;
+    let username = req.session.authorization.username;
+    const isbn = req.params.isbn;
+
+    // check if has the text review on query parameter
+    if (!textReview) {
+        return res.status(404).json({message: "Text review is required."});
+    }
+
+    // get the book ID
+    let bookId = getBookIdByISBN(isbn);
+
+    if (bookId) {
+        let review = {
+            username: username,
+            review: textReview,
+        }
+
+        books[bookId].reviews[review.username] = review.review;
+
+        return res.status(200).json({message: "Review added/modified successfully.", review: review});
+    } else {
+        return res.status(404).json({message: "Book not found."});
+    }
+});
+
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    let username = req.session.authorization.username;
+    const isbn = req.params.isbn;
+
+    let bookId = getBookIdByISBN(isbn);
+    if (bookId && username) {
+        if (books[bookId].reviews[username]) {
+            delete books[bookId].reviews[username];
+            res.status(200).send({message: "Review removed successfully."});
+        } else {
+            return res.status(404).json({message: "No reviews found."});
+        }
+    } else {
+        return res.status(404).json({message: "Book not found."});
+    }
 });
 
 module.exports.authenticated = regd_users;
