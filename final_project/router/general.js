@@ -37,7 +37,7 @@ public_users.get('/isbn/:isbn', function (req, res) {
     res.send(Object.values(books).filter(book => book.isbn === isbn)[0]);
 });
 
-// Get book details based on author
+// Get book details based o n author
 public_users.get('/author/:author', function (req, res) {
     const author = req.params.author;
     res.send(Object.values(books).filter(book => book.author.toLowerCase().includes(author.toLowerCase())));
@@ -53,7 +53,9 @@ public_users.get('/title/:title', function (req, res) {
 //  Get book review
 public_users.get('/review/:isbn', function (req, res) {
     //Write your code here
-    return res.status(300).json({message: "Yet to be implemented"});
+    const isbn = req.params.isbn;
+    let bookReviews = Object.values(books).filter(book => book.isbn === isbn)[0].reviews;
+    res.send(bookReviews);
 });
 
 module.exports.general = public_users;
